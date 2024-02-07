@@ -1,0 +1,25 @@
+callpath.hxx - The full implementation of CallPath::isUnique()
+callpath.cxx - just an example of using callpath.hxx, not needed.
+
+Compile: g++ -rdynamic -lbacktrace  -g callpath.cxx
+These options provide meaningful symbols to the call stack.
+The code still works without it but the backtraces will lack symbols.
+
+-----------------------------------------------------------------
+Example:
+#include <callpath.hxx>
+void funcA(void)
+{
+    if (CallPath::isUnique()) {
+       // first time caller called funcA(), subsequent calls from the same
+       // location return false.  It will also print call stack once.
+    }
+
+// This will print every unique call stack to funcA()
+std::cout << CallPath::callPath() << endl;
+
+-----------------------------------------------------------------
+Use case:
+    If 100 different functions call the same IO routine, you can add
+    CallPath::isUnique() to that common IO routine and add error insertion there.
+    This is equivalent to adding FIF error hooks to the 100 callers but much easier.
