@@ -1,11 +1,17 @@
 #include "callpath.hxx"
 
 void funcC() {
-    CallPath::isUnique();
+    std::string   result;
+    if (CallPath::isUnique(result)) {
+        cout << result << endl;
+    }
 }
 
 void funcB() {
-    CallPath::isUnique();
+    std::string   result;
+    if (CallPath::isUnique(result)) {
+        cout << result << endl;
+    }
 }
 
 void funcA() {
@@ -32,6 +38,5 @@ int main() {
     /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x80)
     ./a.out(_start+0x25)
     */
-    cout << CallPath::callPath();
     return 0;
 }
