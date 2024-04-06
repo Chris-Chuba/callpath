@@ -32,7 +32,7 @@ int CallPath_isUniqueInternal(void*  frame);
 // linear searching, good enough for test code.
 //
 // Returns:  1, if this is the first visit from the caller's return address
-//           0, to indicate subsquent visits
+//           0, to indicate subsequent visits
 int CallPath_isUniqueInternal(void*  frame)
 {
     static int              slot = 0;
@@ -63,7 +63,7 @@ int CallPath_isUniqueInternal(void*  frame)
         }
     }
     if (slot == CP_MAX_SLOTS) {
-        result = 0;   // no nore room
+        result = 0;   // no more room
     }
     if (result) {
         callers[slot++] = frame;
@@ -75,7 +75,7 @@ int CallPath_isUniqueInternal(void*  frame)
 // CallPath_isUnique()
 //
 // Returns: 1, if this is the first visit from the caller's return address
-//          0, to indicate subsquent visits
+//          0, to indicate subsequent visits
 //          I would rather use 'bool' but that's not part of standard C
 
 int CallPath_isUnique(char* result, size_t resultMax)
