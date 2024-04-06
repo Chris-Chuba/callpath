@@ -1,4 +1,19 @@
+/*
+ * Author: Christian Chuba
+ * LinkedIn: https://www.linkedin.com/in/christian-chuba-32a3331/
+ * Compile with ... g++ -rdynamic -lbacktrace  -g, to get meaningful symbols
+ *          (see Makefile)
+ *
+ * Description: Gives a sample usage of callpath.hxx, by having two code paths
+ *          call the same functions 100 times to show that isUnique() will
+ *          only trigger twice.
+ *
+ * License: This code is provided under the MIT License.
+ *          You are free to use, modify, and distribute this code for any purpose,
+ */
+
 #include "callpath.hxx"
+#include <iostream>
 
 void funcC() {
     std::string   result;

@@ -1,19 +1,21 @@
-/**
+/*
  * Author: Christian Chuba
  * LinkedIn: https://www.linkedin.com/in/christian-chuba-32a3331/
+ * Compile with ... g++ -rdynamic -lbacktrace  -g, to get meaningful symbols
  *
  * Description: bool CallPath::isUnique()
- *          This tracks all unique call paths to a given function.
- *          It is useful for learning new code and error insertion testing.
+ *              This tracks all unique call paths to a given function.
+ *              It is useful for learning new code and error insertion testing.
  * Usage:
+ * CallPath::isUnique() - returns true the first time it sees this call stack.
+ *              It returns false one subsequent visits.
+ *
  * void funcA() {
  *    if (CallPath::isUnique()) {
- *       // isUnique() looks at funcA and its call stack, it will log
- *       // and save the first occurrence of every unique call path to funcA().
+ *       // isUnique() returns true for every unique caller.  It returns false
+ *       // subsequent visits from the same location.
  *
- *   std::cout << Callpath::callPath() << endl;  // dump entire list of callers
- *
- * License: This code is provided under the [choose appropriate license, e.g., MIT License].
+ * License: This code is provided under the MIT License.
  *          You are free to use, modify, and distribute this code for any purpose,
  */
 #ifndef _CALLPATH_HXX__
@@ -26,11 +28,10 @@
 #include <map>
 #include <mutex>
 #include <string.h>
-#include <iostream>
 using namespace std;
 
-// compile with ... g++ -rdynamic -lbacktrace  -g, to get meaningful symbols
 
+// class CallPath
 // A singleton to record every unique call path to a given function.
 // Usage:
 // isUnique() returns 'true' every time it detects a unique call path.
@@ -38,19 +39,21 @@ using namespace std;
 //
 class CallPath {
 public:
-    static bool isUnique(void);        // return true on first visit from this caller
-    static CallPath&  callPath(void); // returns the singleton object
-
-    friend ostream& operator<<(ostream& os, const CallPath& obj);
+    // return true on first visit from this call stack
+    static bool isUnique(std::string&  result);
 
 private:
-    CallPath() {}                 // to enforce singleton
-    static CallPath*   mCallPath; // the singleton created on first access
+    CallPath() {}                     // to enforce singleton
+
+    // returns the singleton object
+    static CallPath&  callPath();
+
+    static CallPath*   mCallPath;     // the singleton created on first access
     static std::mutex  mMutex;
 
-    // mCallList, to save record of previous visits to filter out redundant calls
+    // mCallList, records previous visits to filter out redundant calls
     // the first value is the hash of the call stack
-    // the second value is a counter of visits to the same hash
+    // the second value is a counter of visits with the same hash
     std::map<uint64_t, uint64_t>  mCallList;
 
     // Calculate 64 bit hash from call stack and record it on list if it is unique
@@ -58,16 +61,6 @@ private:
 };
 CallPath*  CallPath::mCallPath = nullptr;
 std::mutex CallPath::mMutex;
-
-ostream& operator<<(ostream& os, const CallPath& obj)
-{
-    os << "CallPath: listing call stacks [{call hash}] = {# of visits} times;" << endl;
-    for (const auto& [key, value] : obj.mCallList)
-        os << '[' << key << "] = " << value << " times; ";
-    os << '\n';
-
-    return os;
-}
 
 CallPath&
 CallPath::callPath(void)
@@ -87,14 +80,13 @@ CallPath::callPath(void)
 // of that call path in mCallList to filter out duplicates.
 // It excludes itself from the call stack but includes the calling function.
 bool
-CallPath::isUnique(void)
+CallPath::isUnique(std::string&  result)
 {
     CallPath&  mThis = CallPath::callPath();  // get singleton object
 
     const int max_frames = 8;
     void* frame_ptrs[max_frames];
-    std::string  result;
-    result.reserve(1034); // 1024 is a hint, not a hard limit
+    result.reserve(1024); // 1024 is a hint, not a hard limit
 
     int num_frames = backtrace(frame_ptrs, max_frames);
     size_t  hash = mThis.callerHash(frame_ptrs, num_frames);
@@ -126,7 +118,6 @@ CallPath::isUnique(void)
             }
             result.append(frame + "\n");
         }
-        cout << __func__ << "(), hash = " << hash << "  " << num_frames -1 << " Frames = \n" << result.c_str() << endl;
         free(symbols);
     }
     return true;
